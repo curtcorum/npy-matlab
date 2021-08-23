@@ -20,7 +20,17 @@ try
     [~] = fread(fid, totalHeaderLength, 'uint8');
 
     % read the data
-    data = fread(fid, prod(shape), [dataType '=>' dataType]);
+    %data = fread(fid, prod(shape), [dataType '=>' dataType]);
+    % modifications from https://github.com/kwikteam/npy-matlab/issues/9
+    if strcmp(dataType, "complex8") == 1
+       data = fread(fid, prod(shape)*2, 'single=>single');
+       data = data(1:2:end) + 1j * data(2:2:end);
+    elseif strcmp(dataType, "complex16") == 1
+       data = fread(fid, prod(shape)*2, 'double=>double');
+       data = data(1:2:end) + 1j * data(2:2:end);
+    else
+       data = fread(fid, prod(shape), [dataType '=>' dataType]);
+    end
 
     if length(shape)>1 && ~fortranOrder
         data = reshape(data, shape(end:-1:1));
